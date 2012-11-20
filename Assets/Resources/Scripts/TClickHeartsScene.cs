@@ -367,7 +367,7 @@ public class TClickHeartsScene : FStage, FSingleTouchableInterface {
 		if (gameIsOver && !gameFullyOver) return false;
 		if (gameFullyOver && !initiatedSceneSwitch) {
 			if (score >= 1000000) {
-				TMain.SwitchToScene(TMain.SceneType.PeopleSceneWithTutorial);
+				TMain.SwitchToScene(TMain.SceneType.PeopleSceneGoalThree);
 			}
 			else {
 				TMain.SwitchToScene(TMain.SceneType.ClickHeartsScene);

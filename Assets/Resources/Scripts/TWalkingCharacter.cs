@@ -103,6 +103,7 @@ public class TWalkingCharacter : FContainer {
 	public void StartCrouching() {
 		if (isCrouched) return;
 		
+		
 		isCrouched = true;
 	}
 	

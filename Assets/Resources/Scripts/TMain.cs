@@ -5,13 +5,15 @@ public class TMain : MonoBehaviour {
 	
 	public static FStage currentScene;
 	private static TMain instance_;
+	public static bool goalOneTutorialIsDone = false;
 	
 	public enum SceneType {
 		None,
 		MergeNamesScene,
 		ClickHeartsScene,
-		PeopleSceneWithTutorial,
-		PeopleSceneWithoutTutorial
+		PeopleSceneGoalOne,
+		PeopleSceneGoalTwo,
+		PeopleSceneGoalThree
 	}
 	
 	void Start () {
@@ -27,7 +29,7 @@ public class TMain : MonoBehaviour {
 		Futile.atlasManager.LoadFont("Exotica", "Exotica.png", "Atlases/Exotica");
 		Futile.atlasManager.LoadFont("SoftSugar", "SoftSugar.png", "Atlases/SoftSugar");
 		
-		SwitchToScene(SceneType.MergeNamesScene);
+		SwitchToScene(SceneType.PeopleSceneGoalOne);
 	}
 	
 	public static void SwitchToScene(SceneType sceneType) {
@@ -37,8 +39,12 @@ public class TMain : MonoBehaviour {
 		
 		if (sceneType == SceneType.MergeNamesScene) currentScene = new TMergeNamesScene();
 		if (sceneType == SceneType.ClickHeartsScene) currentScene = new TClickHeartsScene();
-		if (sceneType == SceneType.PeopleSceneWithTutorial) currentScene = new TPeopleScene(true);
-		if (sceneType == SceneType.PeopleSceneWithoutTutorial) currentScene = new TPeopleScene(false);
+		if (sceneType == SceneType.PeopleSceneGoalOne) {
+			currentScene = new TPeopleScene(GoalType.GoalOne);
+			goalOneTutorialIsDone = true;
+		}
+		if (sceneType == SceneType.PeopleSceneGoalTwo) currentScene = new TPeopleScene(GoalType.GoalTwo);
+		if (sceneType == SceneType.PeopleSceneGoalThree) currentScene = new TPeopleScene(GoalType.GoalThree);
 		
 		if (oldScene != null) {
 			currentScene.alpha = 0;
@@ -51,7 +57,7 @@ public class TMain : MonoBehaviour {
 	
 	public static void OnOldSceneCompletedFadingOut(AbstractTween tween) {
 		FStage oldScene = (tween as Tween).target as FStage;
-		oldScene.RemoveFromContainer();
+		Futile.RemoveStage(oldScene);
 	}
 	
 	public TMain instance {

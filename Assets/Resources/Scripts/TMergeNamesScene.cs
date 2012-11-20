@@ -179,7 +179,7 @@ public class TMergeNamesScene : FStage, FSingleTouchableInterface {
 			timeSinceTrebellaLettersFinishedTurningIntoHearts += Time.deltaTime;
 			if (timeSinceTrebellaLettersFinishedTurningIntoHearts > 1.0f && !initiatedSceneSwitch) {
 				initiatedSceneSwitch = true;
-				TMain.SwitchToScene(TMain.SceneType.ClickHeartsScene);
+				TMain.SwitchToScene(TMain.SceneType.PeopleSceneGoalTwo);
 			}
 		}
 	}

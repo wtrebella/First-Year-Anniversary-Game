@@ -7,6 +7,9 @@ using System.Collections.Generic;
 
 public class FLabel : FQuadNode
 {
+	public static float defaultAnchorX = 0.5f;
+	public static float defaultAnchorY = 0.5f;
+	
 	protected FFont _font;
 	protected string _fontName;
 	protected string _text;
@@ -18,14 +21,15 @@ public class FLabel : FQuadNode
 	
 	protected bool _isMeshDirty = false;
 	
-	protected float _anchorX = 0.5f;
-	protected float _anchorY = 0.5f;
+	protected float _anchorX = defaultAnchorX;
+	protected float _anchorY = defaultAnchorY;
 	
 	protected float _lineHeightDelta;
 	protected float _letterSpacingDelta;
 	
 	protected bool _doesTextNeedUpdate = false;
 	protected bool _doesLocalPositionNeedUpdate = false;
+	protected bool _doQuadsNeedUpdate = false;
 	
 	protected Rect _textRect;
 	
@@ -74,6 +78,22 @@ public class FLabel : FQuadNode
 		}
 		
 		UpdateLocalPosition(); //figures out the bounds and alignment, and sets the mesh dirty
+	}
+	
+	override public void HandleAddedToStage() {
+		Futile.instance.SignalUpdate += HandleUpdate;
+		base.HandleAddedToStage();
+	}
+	
+	override public void HandleRemovedFromStage() {
+		Futile.instance.SignalUpdate -= HandleUpdate;
+		base.HandleRemovedFromStage();
+	}
+	
+	private void HandleUpdate() {
+		if (_doesTextNeedUpdate) {
+			CreateTextQuads();	
+		}
 	}
 	
 	public void UpdateLocalPosition()
@@ -125,11 +145,6 @@ public class FLabel : FQuadNode
 		bool wasAlphaDirty = _isAlphaDirty;
 		
 		UpdateDepthMatrixAlpha(shouldForceDirty, shouldUpdateDepth);
-		
-		if(_doesTextNeedUpdate)
-		{
-			CreateTextQuads();
-		}
 		
 		if(shouldUpdateDepth)
 		{
