@@ -46,6 +46,8 @@ public class TMergeNamesScene : FStage, FSingleTouchableInterface {
 	#region Init and Setup
 	
 	public TMergeNamesScene() : base("Name Destroy Scene") {
+		FSoundManager.PlayMusic("reverbPiano");
+		
 		TDiagBarsLayer diagLayer = new TDiagBarsLayer();
 		AddChild(diagLayer);
 		

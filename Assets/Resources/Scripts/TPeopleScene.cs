@@ -18,12 +18,6 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 	FSprite faceCoin;
 	FSprite bigHeartCoin;
 	
-	// parallax stuff
-	List<FSprite> groundBlocks = new List<FSprite>();
-	List<FSprite> farMountainSprites = new List<FSprite>();
-	List<FSprite> closeMountainSprites = new List<FSprite>();
-	FSprite cloud;
-	
 	// UI stuff
 	FSprite goalProgressBar;
 	FLabel start;
@@ -41,6 +35,7 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 	bool tutorialIsDone = true;
 	
 	// game stuff
+	TParallaxScene parallaxScene;
 	FContainer everythingContainer;
 	GoalType goalType;
 	List<THeartToken> heartTokens = new List<THeartToken>();
@@ -66,6 +61,8 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 	bool initiatedSceneSwitch = false;
 	float endGameWaitTimer = 0;
 	bool gameIsOver = false;
+	bool readyToStartOver = false;
+	FLabel startOverLabel;
 	
 	#endregion
 	
@@ -76,9 +73,31 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 		background.x = Futile.screen.halfWidth;
 		background.y = Futile.screen.halfHeight;
 		AddChild(background);
+				
+		startOverLabel = new FLabel("SoftSugar", "Any key or click\nto start completely over");
+		startOverLabel.x = Futile.screen.halfWidth;
+		startOverLabel.y = Futile.screen.halfHeight;
+		startOverLabel.alpha = 0;
+		AddChild(startOverLabel);
 		
 		everythingContainer = new FContainer();
 		AddChild(everythingContainer);
+		
+		parallaxScene = new TParallaxScene(new Color(0.7f, 0.9f, 1.0f, 1.0f));
+		parallaxScene.foregroundVelocity = universalVelocity;
+		parallaxScene.AddLayerWithImageName("mountains0.png", 0.15f, 0, true);
+		parallaxScene.AddLayerWithImageName("mountains1.png", 0.3f, 0, true);
+		parallaxScene.AddLayerWithImageName("cloud.psd", 0.2f, Futile.screen.halfHeight + 100f, false);
+		parallaxScene.AddLayerWithImageName("ground.psd", 1.0f, 0, true);
+		parallaxScene.StartUpdating();
+		everythingContainer.AddChild(parallaxScene);
+		
+		FSprite fog = SquareMaker.Square(Futile.screen.width, Futile.screen.height);
+		fog.x = Futile.screen.halfWidth;
+		fog.y = Futile.screen.halfHeight;
+		fog.color = Color.black;
+		fog.alpha = 0.5f;
+		everythingContainer.AddChild(fog);
 		
 		this.goalType = goalType;
 		tutorialIsDone = TMain.goalOneTutorialIsDone;
@@ -89,7 +108,6 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 		
 		FSoundManager.PlayMusic("jazz");
 		
-		SetupParallax();
 		SetupHeartTokens();
 		SetupUIElements();
 		SetupTutorial();
@@ -97,7 +115,7 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 		SetupFinalNote();
 		
 		if (this.goalType == GoalType.GoalTwo) {
-			FLabel label = new FLabel("SoftSugar", "It's getting harder!");
+			FLabel label = new FLabel("SoftSugar", "\"I hope Dana's around\nhere somewhere!\"");
 			label.x = Futile.screen.halfWidth;
 			label.y = Futile.screen.height - 100f;
 			everythingContainer.AddChild(label);
@@ -109,7 +127,7 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 			tween.play();
 		}
 		else if (this.goalType == GoalType.GoalThree) {
-			FLabel label = new FLabel("SoftSugar", "Will Whit ever\nfind a wife?");
+			FLabel label = new FLabel("SoftSugar", "\"Will I ever survive\nwithout her?\"");
 			label.x = Futile.screen.halfWidth;
 			label.y = Futile.screen.height - 100f;
 			everythingContainer.AddChild(label);
@@ -126,6 +144,9 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 		whit.y = 250f;
 		everythingContainer.AddChild(whit);
 		whit.StartWalking();
+		
+		TBorderLayer borderLayer = new TBorderLayer(Futile.screen.width, Futile.screen.height, 5f, new Color(0.2f, 0.2f, 0.2f, 1.0f));
+		everythingContainer.AddChild(borderLayer);
 	}
 	
 	override public void HandleAddedToStage() {
@@ -148,17 +169,18 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 			label.color = Color.white;
 			label.scale = 0.8f;
 			label.y = Futile.screen.height + 100f;
-			label.x = 650f;
+			label.x = 675f;
 			label.isVisible = false;
 			everythingContainer.AddChild(label);
 			finalNoteLabels.Add(label);
 		}
 		
 		finalNoteStrings.Add("Yay, we found\neach other!");
-		finalNoteStrings.Add("It's a good thing\nbecause you're\nthe best thing\nthat has ever\nhappened to me!");
+		finalNoteStrings.Add("I'm so lucky I found\nyou because you're\nthe best thing\nthat has ever\nhappened to me!");
 		finalNoteStrings.Add("Thanks for being\nso wonderful");
 		finalNoteStrings.Add("Thanks for being\nso hilarious");
 		finalNoteStrings.Add("Thanks for making\nmy dreams come true");
+		finalNoteStrings.Add("Happy one year\nanniversary to the\nbest wife in\nthe world!");
 		finalNoteStrings.Add("I love you!!!");
 	}
 	
@@ -177,9 +199,9 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 		goal.anchorX = 1f;
 		start.color = goal.color = Color.black;
 		start.x = 5f;
-		start.scale = goal.scale = 0.35f;
+		start.scale = goal.scale = 0.3f;
 		goal.x = Futile.screen.width - 5f;
-		start.y = goal.y = Futile.screen.height - 10f;
+		start.y = goal.y = Futile.screen.height - 12f;
 		everythingContainer.AddChild(start);
 		everythingContainer.AddChild(goal);
 	}
@@ -207,11 +229,11 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 		
 		tutorialStrings = new List<string>();
 		
-		tutorialStrings.Add("Help Whit find his sweetheart!");
+		tutorialStrings.Add("\"Oh no, I've lost my beautiful\nwife! Help me find her!\"");
 		tutorialStrings.Add("Press space to jump");
 		tutorialStrings.Add("Hold space to jump higher");
 		tutorialStrings.Add("Press down arrow to crouch");
-		tutorialStrings.Add("The red bar above shows how\nclose Whit is to his goal");
+		tutorialStrings.Add("The red bar above shows how\nclose I am to my goal");
 		tutorialStrings.Add("Avoid the broken hearts!");
 	}
 	
@@ -228,65 +250,6 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 			token.sprite.isVisible = false;
 			everythingContainer.AddChild(token.sprite);
 			heartTokens.Add(token);
-		}
-	}
-	
-	public void SetupParallax() {
-		FSprite background = SquareMaker.Square(Futile.screen.width, Futile.screen.height);
-		background.x = Futile.screen.halfWidth;
-		background.y = Futile.screen.halfHeight;
-		background.color = new Color(0.7f, 0.9f, 1.0f, 1.0f);
-		everythingContainer.AddChild(background);
-		
-		FSprite farMountain1 = new FSprite("mountains0.png");
-		FSprite farMountain2 = new FSprite("mountains0.png");
-		FSprite farMountain3 = new FSprite("mountains0.png");
-		farMountain1.anchorY = farMountain2.anchorY = farMountain3.anchorY = 0;
-		farMountain1.y = farMountain2.y = farMountain3.y = 50f;
-		farMountain1.x = Futile.screen.halfWidth;
-		farMountain2.x = farMountain1.x + farMountain2.width - 2;
-		farMountain3.x = farMountain2.x + farMountain3.width - 2;
-		farMountainSprites.Add(farMountain1);
-		farMountainSprites.Add(farMountain2);
-		farMountainSprites.Add(farMountain3);
-		everythingContainer.AddChild(farMountain1);
-		everythingContainer.AddChild(farMountain2);
-		everythingContainer.AddChild(farMountain3);
-		
-		FSprite closeMountain1 = new FSprite("mountains1.png");
-		FSprite closeMountain2 = new FSprite("mountains1.png");
-		FSprite closeMountain3 = new FSprite("mountains1.png");
-		closeMountain1.anchorY = closeMountain2.anchorY = closeMountain3.anchorY = 0;
-		closeMountain1.y = closeMountain2.y = closeMountain3.y = 50f;
-		closeMountain1.x = Futile.screen.halfWidth;
-		closeMountain2.x = closeMountain1.x + closeMountain2.width - 2;
-		closeMountain3.x = closeMountain2.x + closeMountain3.width - 2;
-		closeMountainSprites.Add(closeMountain1);
-		closeMountainSprites.Add(closeMountain2);
-		closeMountainSprites.Add(closeMountain3);
-		everythingContainer.AddChild(closeMountain1);
-		everythingContainer.AddChild(closeMountain2);
-		everythingContainer.AddChild(closeMountain3);
-		
-		FSprite backgroundFog = SquareMaker.Square(Futile.screen.width, Futile.screen.height);
-		backgroundFog.color = Color.black;
-		backgroundFog.alpha = 0.5f;
-		backgroundFog.x = Futile.screen.halfWidth;
-		backgroundFog.y = Futile.screen.halfHeight;
-		everythingContainer.AddChild(backgroundFog);
-		
-		cloud = new FSprite("cloud.psd");
-		cloud.alpha = 0.6f;
-		cloud.x = Futile.screen.halfWidth;
-		cloud.y = Futile.screen.height - cloud.height / 2f - 20f;
-		everythingContainer.AddChild(cloud);
-		
-		for (int i = 0; i < 3; i++) {
-			FSprite groundBlock = new FSprite("ground.psd");
-			groundBlock.x = i * (groundBlock.width - 2) + groundBlock.width / 2f;
-			groundBlock.y = groundBlock.height / 2f;
-			groundBlocks.Add(groundBlock);
-			everythingContainer.AddChild(groundBlock);
 		}
 	}
 	
@@ -333,7 +296,7 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 		if (tutorialStringIndex == 0) {
 			tutorialLabelShowingTimer += Time.fixedDeltaTime;
 			
-			if (tutorialLabelShowingTimer >= 3.0f) DismissTutorialLabel();
+			if (tutorialLabelShowingTimer >= 5.0f) DismissTutorialLabel();
 		}
 		else if (tutorialStringIndex == 1 && tutorialLabelIsShowing) {
 			if (Input.GetKeyDown(KeyCode.Space)) DismissTutorialLabel();
@@ -364,7 +327,14 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 	
 	#region Updates
 	
-	public void HandleUpdate() {		
+	public void HandleUpdate() {	
+		if (readyToStartOver && !initiatedSceneSwitch) {
+			if (Input.anyKeyDown) {
+				initiatedSceneSwitch = true;
+				TMain.SwitchToScene(TMain.SceneType.PeopleSceneGoalOne);
+			}
+		}
+		
 		if (gameIsOver) {
 			UpdatePostGameOver();
 			return;
@@ -384,7 +354,6 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 		else whit.decelAmt = 250f;
 		if (Input.GetKey(KeyCode.DownArrow)) whit.StartCrouching();
 		if (Input.GetKeyUp(KeyCode.DownArrow)) whit.StopCrouching();
-		UpdateParallax();
 		
 		if (!tutorialIsDone) {
 			UpdateTutorial();
@@ -481,9 +450,8 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 			
 			if (faceCoin.x < 100f) {
 				initiatedSceneSwitch = true;
-				FSoundManager.StopMusic();
 				FSoundManager.PlaySound("success");
-				TMain.SwitchToScene(TMain.SceneType.MergeNamesScene);
+				TMain.SwitchToScene(TMain.SceneType.DreamSceneOne);
 			}
 		}
 		
@@ -519,7 +487,7 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 				initiatedSceneSwitch = true;
 				FSoundManager.StopMusic();
 				FSoundManager.PlaySound("success");
-				TMain.SwitchToScene(TMain.SceneType.ClickHeartsScene);
+				TMain.SwitchToScene(TMain.SceneType.DreamSceneTwo);
 			}
 		}
 		
@@ -541,44 +509,13 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 				dana.TurnAround();
 				dana.StopWalking();
 				whit.StopWalking();
+				parallaxScene.StopUpdating();
 				whit.StopCrouching();
 				StartHeartShower();
 			}
 		}
 	}
 	
-	public void UpdateParallax() {
-		foreach (FSprite groundBlock in groundBlocks) {
-			float newX = groundBlock.x + universalVelocity * Time.fixedDeltaTime;
-			if (newX < -groundBlock.width / 2f) {
-				newX += groundBlocks.Count * (groundBlock.width - 2);	
-			}
-			groundBlock.x = newX;
-		}
-		
-		foreach (FSprite mountain in farMountainSprites) {
-			float newX = mountain.x + (universalVelocity * 0.15f) * Time.fixedDeltaTime;
-			if (newX < -mountain.width / 2f) {
-				newX += farMountainSprites.Count * (mountain.width - 2);	
-			}
-			mountain.x = newX;
-		}
-		
-		foreach (FSprite mountain in closeMountainSprites) {
-			float newX = mountain.x + (universalVelocity * 0.3f) * Time.fixedDeltaTime;
-			if (newX < -mountain.width / 2f) {
-				newX += closeMountainSprites.Count * (mountain.width - 2);	
-			}
-			mountain.x = newX;
-		}
-		
-		float cloudX = cloud.x + (universalVelocity * 0.2f) * Time.fixedDeltaTime;
-		if (cloudX < -cloud.width / 2f) {
-			cloudX += Futile.screen.width + cloud.width + Random.Range(30f, 200f);	
-		}
-		cloud.x = cloudX;
-	}
-
 	public void UpdatePostGameOver() {
 		endGameWaitTimer += Time.fixedDeltaTime;
 			
@@ -623,6 +560,7 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 			if (!token.sprite.isVisible) continue;
 			if (whit.GetGlobalBoundsRect().CheckIntersect(token.GetGlobalBoundsRect())) {
 				FSoundManager.PlayMusic("nooo");
+				parallaxScene.StopUpdating();
 				GameOver();
 			}
 		}
@@ -731,7 +669,8 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 	}
 	
 	public void OnSceneFadedOut(AbstractTween tween) {
-			
+		readyToStartOver = true;
+		Go.to(startOverLabel, 0.3f, new TweenConfig().floatProp("alpha", 1.0f));
 	}
 	
 	void StartHeartShower() {
@@ -754,6 +693,11 @@ public class TPeopleScene : FStage, FSingleTouchableInterface {
 			if (goalType == GoalType.GoalOne) TMain.SwitchToScene(TMain.SceneType.PeopleSceneGoalOne);
 			else if (goalType == GoalType.GoalTwo) TMain.SwitchToScene(TMain.SceneType.PeopleSceneGoalTwo);
 			else if (goalType == GoalType.GoalThree) TMain.SwitchToScene(TMain.SceneType.PeopleSceneGoalThree);
+		}
+		
+		if (readyToStartOver && !initiatedSceneSwitch) {
+			initiatedSceneSwitch = true;
+			TMain.SwitchToScene(TMain.SceneType.PeopleSceneGoalOne);
 		}
 		
 		return true;

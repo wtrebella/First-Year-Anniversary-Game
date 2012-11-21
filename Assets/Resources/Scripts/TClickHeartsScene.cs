@@ -27,6 +27,8 @@ public class TClickHeartsScene : FStage, FSingleTouchableInterface {
 	FLabel startLabel2;
 		
 	public TClickHeartsScene() : base("") {	
+		FSoundManager.PlayMusic("reverbPiano");
+		
 		Go.validateTargetObjectsEachTick = false;
 		
 		FSoundManager.PlaySound("harpDescend");
@@ -231,6 +233,7 @@ public class TClickHeartsScene : FStage, FSingleTouchableInterface {
 		
 		if (score >= 1000000) {
 			StartHeartShower();
+			FSoundManager.StopMusic();
 			FSoundManager.PlaySound("happyPiano");
 			gameIsOver = true;
 			FLabel label = new FLabel("SoftSugar", "I love you times a million!");
@@ -250,6 +253,7 @@ public class TClickHeartsScene : FStage, FSingleTouchableInterface {
 		
 		if (numHeartsMissed >= 5) {
 			gameIsOver = true;
+			FSoundManager.StopMusic();
 			FSoundManager.PlaySound("sadPiano");
 			FLabel topLabel = new FLabel("SoftSugar", "Are you kidding me?!");
 			FLabel bottomLabel = new FLabel("SoftSugar", string.Format("I love you way more than x{0:#,###0}!", score));
